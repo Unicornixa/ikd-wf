@@ -153,12 +153,28 @@
       $form.attr("data-redirect", finalRedirect);
       $form.data("redirect", finalRedirect);
 
-      // Timeout before redirect
-      console.log("Setting timeout for redirect to:", finalRedirect);
-      setTimeout(function () {
+      // Wait for successful Webflow submission before redirecting
+      console.log("Waiting for successful Webflow submission...");
+      
+      $(document).one("ajaxComplete", function (event, xhr, settings) {
+      
+        const isWebflowRequest =
+          settings.url.includes("/api/v1/form/");
+      
+        if (!isWebflowRequest) return;
+      
+        console.log("[email form] Webflow request detected");
+      
+        if (xhr.status !== 200) {
+          console.warn("[email form] Submission failed");
+          return;
+        }
+      
+        console.log("[email form] Successful submission");
         console.log("Executing redirect to:", finalRedirect);
+      
         window.location.href = finalRedirect;
-      }, 1000);
+      });
     });
 
     console.log("[email form] Initialization complete");
